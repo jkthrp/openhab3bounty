@@ -1,0 +1,30 @@
+rule "Trigger Alexa Commands Before Alarm"
+when
+    Item NextAlarm changed
+then
+    // Check if an old timer is running and cancel it
+    if (timer != null) {
+        timer.cancel()
+        timer = null
+    }
+    
+    // Check if NextAlarm is more than X minutes in the future
+    val minutesBeforeAlarm = X // Replace X with the desired number of minutes before the alarm
+    val currentTime = now
+    val alarmTime = NextAlarm.state as DateTimeType
+    val timeDifference = alarmTime.minusMinutes(minutesBeforeAlarm).millis - currentTime.millis
+
+    if (timeDifference > 0) {
+        // Set a new timer with an end time of NextAlarm.minusMinutes(X)
+        timer = createTimer(now.plusMillis(timeDifference)) [|
+            // Perform the actions you want to trigger on Alexa
+            // This could include sending commands to control lights, etc.
+            // Example: sendCommand(LightItem, ON)
+            
+            timer = null // Reset the timer variable
+        ]
+    } else {
+        // Handle the case when NextAlarm is too close to the current time
+        // Add appropriate error handling or fallback actions here
+    }
+end
